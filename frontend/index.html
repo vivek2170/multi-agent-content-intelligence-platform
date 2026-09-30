@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentForge</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <img src="assets/favicon-32x32.png" alt="ContentForge" class="header-logo">
+                <h1>ContentForge</h1>
+                <p>Content generation and verification</p>
+            </div>
+            <div id="providerBadge" class="provider-badge">Loading provider…</div>
+        </header>
+
+        <main>
+            <section class="form-section" id="formSection">
+                <h2>New request</h2>
+                <form id="generateForm">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="topic">Topic</label>
+                            <input type="text" id="topic" name="topic" required placeholder="e.g., How AI is transforming healthcare">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="platform">Platform</label>
+                            <select id="platform" name="platform" required>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="X/Twitter">X/Twitter</option>
+                                <option value="Blog">Blog</option>
+                                <option value="Instagram caption">Instagram Caption</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="audience">Audience</label>
+                            <input type="text" id="audience" name="audience" required placeholder="e.g., Healthcare executives">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tone">Tone</label>
+                            <select id="tone" name="tone" required>
+                                <option value="Professional">Professional</option>
+                                <option value="Casual">Casual</option>
+                                <option value="Enthusiastic">Enthusiastic</option>
+                                <option value="Informative">Informative</option>
+                                <option value="Persuasive">Persuasive</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="posts">Number of posts</label>
+                            <input type="number" id="posts" name="posts" min="1" max="10" value="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="length">Length</label>
+                            <select id="length" name="length" required>
+                                <option value="Short">Short</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Long">Long</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="provider">Provider</label>
+                            <select id="provider" name="provider">
+                                <option value="mock">Mock</option>
+                                <option value="ollama">Ollama</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="model">Model</label>
+                            <input type="text" id="model" name="model" placeholder="llama3.2:3b">
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="keywords">Keywords</label>
+                            <input type="text" id="keywords" name="keywords" placeholder="Comma-separated keywords">
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="urls">Research URLs</label>
+                            <input type="text" id="urls" name="urls" placeholder="Comma-separated URLs, optional">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="btn-primary">Generate</button>
+                </form>
+            </section>
+
+            <section class="status-section" id="statusSection" style="display: none;">
+                <h2>Generation status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Run ID</span>
+                        <span id="runId" class="status-value"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Status</span>
+                        <span id="status" class="status-value"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Quality score</span>
+                        <span id="qualityScore" class="status-value"></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Elapsed</span>
+                        <span id="elapsed" class="status-value">0s</span>
+                    </div>
+                </div>
+
+                <div class="workflow-steps" id="workflowSteps"></div>
+
+                <div class="progress-track">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+
+                <div id="errorSection" class="error-section" style="display: none;">
+                    <strong>Error</strong>
+                    <ul id="errorList"></ul>
+                </div>
+            </section>
+
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Generated content</h2>
+                <div id="postsContainer"></div>
+
+                <div class="metadata">
+                    <h3>Metadata</h3>
+                    <div class="meta-grid">
+                        <div class="meta-item">
+                            <span class="meta-label">Sources</span>
+                            <span id="sourceCount" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Total tokens</span>
+                            <span id="totalTokens" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Total cost</span>
+                            <span id="totalCost" class="meta-value"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Latency</span>
+                            <span id="totalLatency" class="meta-value"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="newContentBtn" class="btn-secondary">New request</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>ContentForge v0.1.0</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# Python / virtualenv
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Database / logs / data
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite
+logs/*.log
+
+# OS / editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Build / cache / temp
+*.tmp
+*.temp
+dist/
+build/
