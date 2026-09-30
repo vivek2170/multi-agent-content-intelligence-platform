@@ -3,12 +3,17 @@
   "short_name": "ContentForge",
   "icons": [
     {
-      "src": "../ChatGPT Image Sep 30, 2026, 07_46_31 PM.png",
-      "sizes": "192x192",
+      "src": "assets/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon-16x16.png",
+      "sizes": "16x16",
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#0f4c81",
   "background_color": "#ffffff",
   "display": "standalone"
 }

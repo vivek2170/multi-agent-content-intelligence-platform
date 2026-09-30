@@ -23,6 +23,7 @@ class RunRecord(Base):
     sources = relationship("SourceRecord", back_populates="run", cascade="all, delete-orphan")
     llm_provider = Column(String, index=True, nullable=True)
     llm_model = Column(String, nullable=True)
+    current_agent = Column(String, nullable=True)
 
 class AgentMetricRecord(Base):
     __tablename__ = "agent_metrics"

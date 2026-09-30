@@ -69,7 +69,7 @@ async def run_status(run_id: str, db: Session = Depends(get_db)):
     run = db_service.get_run(run_id)
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
-    return StatusResponse(run_id=run.run_id, status=WorkflowStatus(run.status), current_agent=None, revision_count=run.revision_count, quality_score=run.quality_score, created_at=run.created_at, updated_at=run.updated_at)
+    return StatusResponse(run_id=run.run_id, status=WorkflowStatus(run.status), current_agent=run.current_agent, revision_count=run.revision_count, quality_score=run.quality_score, created_at=run.created_at, updated_at=run.updated_at)
 
 
 @router.get("/runs/{run_id}/trace", responses={404: {"model": ErrorResponse}})
@@ -93,6 +93,7 @@ async def run_trace(run_id: str, db: Session = Depends(get_db)):
         "completed_at": run.completed_at.isoformat() if run.completed_at else None,
         "llm_provider": run.llm_provider,
         "llm_model": run.llm_model,
+        "current_agent": run.current_agent,
     }
 
 
@@ -111,7 +112,7 @@ async def run_workflow(run_id: str, request: dict, wf: ContentWorkflow):
         logger.info("run_workflow start run_id=%s", run_id)
         db = SessionLocal()
         db_service = DatabaseService(db)
-        db_service.create_run(run_id, request, WorkflowStatus.CREATED.value)
+        db_service.create_run(run_id, request, WorkflowStatus.CREATED.value, current_agent="planner")
         logger.info("run_workflow executing run_id=%s", run_id)
         try:
             result = await wf.execute(run_id, request)
@@ -131,11 +132,11 @@ async def run_workflow(run_id: str, request: dict, wf: ContentWorkflow):
                 sources = []
             metrics = result.get("metrics", [])
             errors = result.get("errors", [])
-            db_service.complete_run(run_id, status, final_content, result.get("quality_score", 0.0), metrics, errors, sources)
+            db_service.complete_run(run_id, status, final_content, result.get("quality_score", 0.0), metrics, errors, sources, current_agent=result.get("current_agent"))
             logger.info("run_workflow saved run_id=%s posts=%s", run_id, len(post_contents))
         except Exception as e:
             logger.exception("run_workflow workflow error run_id=%s: %s", run_id, e)
-            db_service.complete_run(run_id, "FAILED", "", 0.0, [], [str(e)], [])
+            db_service.complete_run(run_id, "FAILED", "", 0.0, [], [str(e)], [], current_agent=None)
     except Exception as e:
         logger.exception("run_workflow outer error run_id=%s: %s", run_id, e)
     finally:

@@ -8,17 +8,17 @@ class DatabaseService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_run(self, run_id: str, request: dict, status: str):
+    def create_run(self, run_id: str, request: dict, status: str, current_agent: str = None):
         provider = request.get("provider") if isinstance(request, dict) else None
         model = request.get("model") if isinstance(request, dict) else None
         if not model and provider == "ollama":
             model = "llama3.2:3b"
-        run = RunRecord(run_id=run_id, status=status, request=json.dumps(request), llm_provider=provider, llm_model=model)
+        run = RunRecord(run_id=run_id, status=status, request=json.dumps(request), llm_provider=provider, llm_model=model, current_agent=current_agent)
         self.db.add(run)
         self.db.commit()
         return run
 
-    def complete_run(self, run_id: str, status: str, final_content: str, quality_score: float, metrics: list, errors: list, sources: list):
+    def complete_run(self, run_id: str, status: str, final_content: str, quality_score: float, metrics: list, errors: list, sources: list, current_agent: str = None):
         run = self.db.query(RunRecord).filter(RunRecord.run_id == run_id).first()
         if not run:
             return
@@ -27,6 +27,7 @@ class DatabaseService:
         run.quality_score = quality_score
         run.errors = json.dumps(errors)
         run.completed_at = datetime.utcnow()
+        run.current_agent = current_agent
         total_tokens = sum(getattr(m, 'total_tokens', 0) for m in metrics)
         total_cost = sum(getattr(m, 'estimated_cost', 0.0) for m in metrics)
         total_latency = sum(getattr(m, 'latency_ms', 0) for m in metrics)

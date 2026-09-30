@@ -157,6 +157,17 @@ async function updateStatus(status) {
     const qualityEl = document.getElementById('qualityScore');
     if (qualityEl) qualityEl.textContent = status.quality_score ? `${status.quality_score}/100` : '—';
 
+    const agentEl = document.getElementById('currentAgent');
+    if (agentEl) agentEl.textContent = status.current_agent ? status.current_agent.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—';
+
+    const updatedEl = document.getElementById('lastUpdated');
+    if (updatedEl && status.updated_at) {
+        const date = new Date(status.updated_at);
+        updatedEl.textContent = isNaN(date.getTime()) ? '—' : date.toLocaleTimeString();
+    }
+
+    renderWorkflowSteps(status.metrics || [], status.current_agent);
+
     if (['APPROVED', 'NEEDS_HUMAN_REVIEW', 'READY_FOR_REVIEW', 'FAILED'].includes(status.status)) {
         stopStatusCheck();
         stopElapsedTimer();
@@ -205,7 +216,7 @@ async function showResults() {
     }
 }
 
-function renderWorkflowSteps(agentMetrics) {
+function renderWorkflowSteps(agentMetrics, currentAgent) {
     const container = document.getElementById('workflowSteps');
     if (!container) return;
 
@@ -220,8 +231,9 @@ function renderWorkflowSteps(agentMetrics) {
 
     container.innerHTML = AGENT_ORDER.map(name => {
         let cls = 'workflow-step';
-        if (completed.has(name)) cls += ' done';
-        else if (failed.has(name)) cls += ' failed';
+        if (failed.has(name)) cls += ' failed';
+        else if (completed.has(name)) cls += ' done';
+        else if (currentAgent === name) cls += ' active';
 
         const icon = failed.has(name) ? '!' : completed.has(name) ? '✓' : '○';
         const label = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
